@@ -1,0 +1,9 @@
+1:"$Sreact.fragment"
+2:I[47257,["/trading-globe/_next/static/chunks/0v90e52bsza-c.js","/trading-globe/_next/static/chunks/0jf84cixr0cbb.js"],"ClientPageRoot"]
+3:I[31713,["/trading-globe/_next/static/chunks/0v90e52bsza-c.js","/trading-globe/_next/static/chunks/0jf84cixr0cbb.js","/trading-globe/_next/static/chunks/0nmijo6ln5i3w.js","/trading-globe/_next/static/chunks/0l-1e5_nmkb44.js","/trading-globe/_next/static/chunks/033ree06_bcyh.js"],"default"]
+6:I[97367,["/trading-globe/_next/static/chunks/0v90e52bsza-c.js","/trading-globe/_next/static/chunks/0jf84cixr0cbb.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/trading-globe/_next/static/chunks/0nmijo6ln5i3w.js","async":true}],["$","script","script-1",{"src":"/trading-globe/_next/static/chunks/0l-1e5_nmkb44.js","async":true}],["$","script","script-2",{"src":"/trading-globe/_next/static/chunks/033ree06_bcyh.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"uBRNPID93LLHO9oTAChu9"}
+4:{}
+5:"$0:rsc:props:children:0:props:serverProvidedParams:params"
+8:null

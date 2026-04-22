@@ -22,6 +22,8 @@ except ImportError:
 DIR_PATH = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(DIR_PATH)
 STATIC_DIR = os.path.join(DIR_PATH, "static")
+TRADING_GLOBE_SRC_DIR = os.path.join(DIR_PATH, "trading-globe-brain-src")
+TRADING_GLOBE_STATIC_DIR = os.path.join(DIR_PATH, "trading-globe-brain-static")
 DB_PATH = os.path.join(ROOT_DIR, "stock_data.db")
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
@@ -741,6 +743,38 @@ def get_recommendations():
 
 
 # ── LOGIC PROTECTIONS ───────────────────────────────────────────────────────
+
+def _send_trading_globe_asset(asset_path="index.html"):
+    if not os.path.isdir(TRADING_GLOBE_STATIC_DIR):
+        return jsonify({
+            "error": "Trading Globe UI has not been built yet.",
+            "source_dir": TRADING_GLOBE_SRC_DIR,
+            "expected_static_dir": TRADING_GLOBE_STATIC_DIR,
+        }), 503
+
+    normalized = (asset_path or "index.html").strip("/") or "index.html"
+    candidate = os.path.join(TRADING_GLOBE_STATIC_DIR, normalized)
+
+    if os.path.isfile(candidate):
+        return send_from_directory(TRADING_GLOBE_STATIC_DIR, normalized)
+
+    nested_index = os.path.join(candidate, "index.html")
+    if os.path.isfile(nested_index):
+        return send_from_directory(os.path.join(TRADING_GLOBE_STATIC_DIR, normalized), "index.html")
+
+    return send_from_directory(TRADING_GLOBE_STATIC_DIR, "index.html")
+
+
+@app.route("/trading-globe")
+@app.route("/trading-globe/")
+def trading_globe_page():
+    return _send_trading_globe_asset()
+
+
+@app.route("/trading-globe/<path:asset_path>")
+def trading_globe_assets(asset_path):
+    return _send_trading_globe_asset(asset_path)
+
 
 @app.route("/login")
 def login_page():
