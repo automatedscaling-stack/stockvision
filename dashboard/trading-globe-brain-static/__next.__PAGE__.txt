@@ -1,9 +1,9 @@
 1:"$Sreact.fragment"
 2:I[47257,["/trading-globe/_next/static/chunks/0v90e52bsza-c.js","/trading-globe/_next/static/chunks/0jf84cixr0cbb.js"],"ClientPageRoot"]
-3:I[31713,["/trading-globe/_next/static/chunks/0v90e52bsza-c.js","/trading-globe/_next/static/chunks/0jf84cixr0cbb.js","/trading-globe/_next/static/chunks/0d-4yh2tbrzod.js","/trading-globe/_next/static/chunks/0_j4uxbxd5mtr.js","/trading-globe/_next/static/chunks/0he3c0duix9l7.js"],"default"]
+3:I[31713,["/trading-globe/_next/static/chunks/0v90e52bsza-c.js","/trading-globe/_next/static/chunks/0jf84cixr0cbb.js","/trading-globe/_next/static/chunks/0mc5s~mo~hlwc.js","/trading-globe/_next/static/chunks/0_j4uxbxd5mtr.js","/trading-globe/_next/static/chunks/0he3c0duix9l7.js"],"default"]
 6:I[97367,["/trading-globe/_next/static/chunks/0v90e52bsza-c.js","/trading-globe/_next/static/chunks/0jf84cixr0cbb.js"],"OutletBoundary"]
 7:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/trading-globe/_next/static/chunks/0d-4yh2tbrzod.js","async":true}],["$","script","script-1",{"src":"/trading-globe/_next/static/chunks/0_j4uxbxd5mtr.js","async":true}],["$","script","script-2",{"src":"/trading-globe/_next/static/chunks/0he3c0duix9l7.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ITegWJmHSWLJchsxQI7oA"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/trading-globe/_next/static/chunks/0mc5s~mo~hlwc.js","async":true}],["$","script","script-1",{"src":"/trading-globe/_next/static/chunks/0_j4uxbxd5mtr.js","async":true}],["$","script","script-2",{"src":"/trading-globe/_next/static/chunks/0he3c0duix9l7.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"nqhcYPI8t9deRl1POVGR6"}
 4:{}
 5:"$0:rsc:props:children:0:props:serverProvidedParams:params"
 8:null

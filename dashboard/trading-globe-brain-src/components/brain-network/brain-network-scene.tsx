@@ -69,32 +69,44 @@ function AmbientPulse() {
 }
 
 function BackgroundMotionLayer() {
-  const backgroundAsset = useMemo(() => {
-    if (typeof window === "undefined") return "./trading-background.gif"
-    const path = window.location.pathname.endsWith("/") ? window.location.pathname : `${window.location.pathname}/`
-    return `${path}trading-background.gif`
+  const assetBase = useMemo(() => {
+    if (typeof window === "undefined") return "./"
+    return window.location.pathname.endsWith("/") ? window.location.pathname : `${window.location.pathname}/`
   }, [])
+
+  const backgroundVideo = `${assetBase}trading-background.mp4`
+  const backgroundFallback = `${assetBase}trading-background.gif`
 
   return (
     <>
       <div className="pointer-events-none absolute inset-0 overflow-hidden bg-black">
+        <video
+          className="absolute inset-0 h-full w-full object-cover opacity-45"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster={backgroundFallback}
+        >
+          <source src={backgroundVideo} type="video/mp4" />
+        </video>
         <div
-          className="absolute inset-0 opacity-40"
+          className="absolute inset-0"
           style={{
             backgroundImage: [
               "radial-gradient(circle at 20% 18%, rgba(255,212,77,0.22), transparent 24%)",
               "radial-gradient(circle at 78% 28%, rgba(46,167,255,0.24), transparent 26%)",
               "radial-gradient(circle at 64% 74%, rgba(57,229,140,0.18), transparent 22%)",
-              "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.74))",
-              `url('${backgroundAsset}')`,
+              "linear-gradient(180deg, rgba(0,0,0,0.16), rgba(0,0,0,0.78))",
             ].join(", "),
-            backgroundSize: "cover, cover, cover, cover, cover",
-            backgroundPosition: "center, center, center, center, center",
-            filter: "saturate(1.15) contrast(1.05)",
+            backgroundSize: "cover, cover, cover, cover",
+            backgroundPosition: "center, center, center, center",
+            filter: "saturate(1.15) contrast(1.08)",
             animation: "brainBackdropDrift 28s linear infinite",
           }}
         />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.18)_55%,rgba(0,0,0,0.82)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.18)_55%,rgba(0,0,0,0.84)_100%)]" />
         <div className="brain-grid absolute inset-0 opacity-20" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.88),transparent_18%,transparent_82%,rgba(0,0,0,0.82))]" />
       </div>
