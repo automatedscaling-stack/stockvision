@@ -1,103 +1,66 @@
 "use client"
 
-import { useRef, useState, useMemo } from "react"
-import { useFrame, extend } from "@react-three/fiber"
+import { useMemo, useRef, useState } from "react"
 import { Html, shaderMaterial } from "@react-three/drei"
+import { extend, useFrame } from "@react-three/fiber"
 import * as THREE from "three"
-import type { Mesh, Group, Points, ShaderMaterial } from "three"
+import type { Group, Mesh, ShaderMaterial } from "three"
 
-// Metallic gradient shader material
-const MetallicGradientMaterial = shaderMaterial(
+const LuminousMetalMaterial = shaderMaterial(
   {
     time: 0,
-    colorA: new THREE.Color("#FFD700"),
-    colorB: new THREE.Color("#FF8C00"),
-    fresnelPower: 2.0,
-    metalness: 0.9,
-    roughness: 0.1,
+    colorA: new THREE.Color("#FFD44D"),
+    colorB: new THREE.Color("#00C2FF"),
   },
-  // Vertex shader
   `
     varying vec3 vNormal;
-    varying vec3 vViewPosition;
-    varying vec2 vUv;
     varying vec3 vPosition;
-    
+
     void main() {
       vNormal = normalize(normalMatrix * normal);
-      vUv = uv;
       vPosition = position;
-      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-      vViewPosition = -mvPosition.xyz;
-      gl_Position = projectionMatrix * mvPosition;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `,
-  // Fragment shader
   `
     uniform float time;
     uniform vec3 colorA;
     uniform vec3 colorB;
-    uniform float fresnelPower;
-    uniform float metalness;
-    uniform float roughness;
-    
+
     varying vec3 vNormal;
-    varying vec3 vViewPosition;
-    varying vec2 vUv;
     varying vec3 vPosition;
-    
+
     void main() {
-      vec3 viewDir = normalize(vViewPosition);
-      
-      // Fresnel effect for metallic rim
-      float fresnel = pow(1.0 - abs(dot(viewDir, vNormal)), fresnelPower);
-      
-      // Dynamic gradient based on position and time
-      float gradientFactor = sin(vPosition.y * 0.5 + time * 0.5) * 0.5 + 0.5;
-      gradientFactor += sin(vPosition.x * 0.3 + time * 0.3) * 0.25;
-      gradientFactor = clamp(gradientFactor, 0.0, 1.0);
-      
-      // Mix colors with opalescent shimmer
-      vec3 baseColor = mix(colorA, colorB, gradientFactor);
-      
-      // Add iridescent highlights
-      float iridescence = sin(vUv.x * 20.0 + time) * sin(vUv.y * 20.0 + time * 0.7);
-      vec3 iridescentColor = vec3(
-        0.5 + 0.5 * sin(iridescence + 0.0),
-        0.5 + 0.5 * sin(iridescence + 2.0),
-        0.5 + 0.5 * sin(iridescence + 4.0)
-      );
-      
-      // Metallic specular highlights
-      vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
-      vec3 halfDir = normalize(lightDir + viewDir);
-      float specular = pow(max(dot(vNormal, halfDir), 0.0), 64.0 / (roughness + 0.01));
-      
-      // Combine all effects
-      vec3 finalColor = baseColor * (1.0 - metalness * 0.5);
-      finalColor += iridescentColor * 0.15 * metalness;
-      finalColor += fresnel * colorB * 0.8;
-      finalColor += specular * vec3(1.0) * metalness;
-      
-      // Add subtle glow at edges
-      float glow = fresnel * 0.5;
-      finalColor += glow * mix(colorA, colorB, 0.5);
-      
+      float shimmer = sin(vPosition.y * 0.8 + time * 1.3) * 0.5 + 0.5;
+      float pulse = sin(time * 1.9 + length(vPosition) * 0.35) * 0.5 + 0.5;
+      float fresnel = pow(1.0 - abs(dot(normalize(vNormal), vec3(0.0, 0.0, 1.0))), 2.5);
+
+      vec3 base = mix(colorA, colorB, shimmer);
+      vec3 highlight = mix(colorB, colorA, pulse) * 0.55;
+      vec3 finalColor = base + highlight * 0.35 + fresnel * mix(colorA, colorB, 0.5) * 0.9;
+
       gl_FragColor = vec4(finalColor, 0.92);
     }
   `
 )
 
-extend({ MetallicGradientMaterial })
+extend({ LuminousMetalMaterial })
 
-// Declare the JSX element type
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      metallicGradientMaterial: any
+      luminousMetalMaterial: any
     }
   }
 }
+
+export const gradientPairs = [
+  { colorA: "#FFD44D", colorB: "#FF8A1E", name: "gold-amber" },
+  { colorA: "#FF9F1A", colorB: "#2EA7FF", name: "amber-electric" },
+  { colorA: "#2EA7FF", colorB: "#49E1FF", name: "blue-aqua" },
+  { colorA: "#49E1FF", colorB: "#39E58C", name: "aqua-emerald" },
+  { colorA: "#39E58C", colorB: "#B9FF4F", name: "emerald-lime" },
+]
 
 interface TradingStrategy {
   name: string
@@ -108,15 +71,6 @@ interface TradingStrategy {
   indicators: string[]
   details: string
 }
-
-// Gradient color pairs for the opalescent effect
-export const gradientPairs = [
-  { colorA: "#FF8C00", colorB: "#FFD700", name: "orange-yellow" },      // Orange → Yellow
-  { colorA: "#FFD700", colorB: "#00FF7F", name: "yellow-green" },       // Yellow → Green  
-  { colorA: "#1E90FF", colorB: "#00CED1", name: "blue-aqua" },          // Blue → Aqua
-  { colorA: "#00CED1", colorB: "#FFD700", name: "aqua-yellow" },        // Aqua → Yellow
-  { colorA: "#9B30FF", colorB: "#FF1744", name: "purple-red" },         // Purple → Red
-]
 
 interface BrainGlobeProps {
   position: [number, number, number]
@@ -129,203 +83,142 @@ interface BrainGlobeProps {
 export function BrainGlobe({ position, gradientIndex, size, strategy, onSelect }: BrainGlobeProps) {
   const groupRef = useRef<Group>(null)
   const materialRef = useRef<ShaderMaterial>(null)
-  const glowRef = useRef<Mesh>(null)
-  const innerGlowRef = useRef<Mesh>(null)
-  const ringsRef = useRef<Group>(null)
+  const auraRef = useRef<Mesh>(null)
+  const ringRef = useRef<Group>(null)
   const [hovered, setHovered] = useState(false)
 
   const gradient = gradientPairs[gradientIndex % gradientPairs.length]
+  const colorA = useMemo(() => new THREE.Color(gradient.colorA), [gradient.colorA])
+  const colorB = useMemo(() => new THREE.Color(gradient.colorB), [gradient.colorB])
+  const mixedColor = useMemo(() => new THREE.Color().lerpColors(colorA, colorB, 0.5), [colorA, colorB])
 
-  // Create internal neural web geometry
-  const internalConnections = useMemo(() => {
-    const lines: THREE.Vector3[][] = []
-    const nodeCount = 60
-    const nodes: THREE.Vector3[] = []
-    
-    for (let i = 0; i < nodeCount; i++) {
-      const phi = Math.acos(-1 + (2 * i) / nodeCount)
-      const theta = Math.sqrt(nodeCount * Math.PI) * phi
-      const radius = size * (0.3 + Math.random() * 0.5)
-      nodes.push(new THREE.Vector3(
-        radius * Math.cos(theta) * Math.sin(phi),
-        radius * Math.sin(theta) * Math.sin(phi),
-        radius * Math.cos(phi)
-      ))
+  const innerNetwork = useMemo(() => {
+    const pointCount = 10
+    const positions = new Float32Array(pointCount * 2 * 3)
+
+    const samplePoint = () => {
+      const theta = Math.random() * Math.PI * 2
+      const phi = Math.acos(2 * Math.random() - 1)
+      const radius = size * (0.16 + Math.random() * 0.42)
+      return new THREE.Vector3(
+        radius * Math.sin(phi) * Math.cos(theta),
+        radius * Math.cos(phi),
+        radius * Math.sin(phi) * Math.sin(theta)
+      )
     }
 
-    for (let i = 0; i < nodeCount; i++) {
-      const connections = Math.floor(Math.random() * 4) + 2
-      for (let j = 0; j < connections; j++) {
-        const target = Math.floor(Math.random() * nodeCount)
-        if (target !== i) {
-          lines.push([nodes[i], nodes[target]])
-        }
-      }
+    for (let i = 0; i < pointCount; i++) {
+      const a = samplePoint()
+      const b = samplePoint()
+      positions.set([a.x, a.y, a.z, b.x, b.y, b.z], i * 6)
     }
-    return lines
-  }, [size])
 
-  // Create energy ring positions
-  const energyRings = useMemo(() => {
-    return [
-      { radius: size * 1.15, thickness: 0.03, rotation: [Math.PI / 2, 0, 0] as [number, number, number] },
-      { radius: size * 1.25, thickness: 0.02, rotation: [Math.PI / 2.5, Math.PI / 4, 0] as [number, number, number] },
-      { radius: size * 1.35, thickness: 0.015, rotation: [Math.PI / 3, -Math.PI / 3, Math.PI / 6] as [number, number, number] },
-    ]
+    return positions
   }, [size])
 
   useFrame((state) => {
-    const time = state.clock.elapsedTime
+    const t = state.clock.elapsedTime
 
     if (groupRef.current) {
-      groupRef.current.rotation.y += 0.003
-      groupRef.current.rotation.x = Math.sin(time * 0.15) * 0.08
+      groupRef.current.rotation.y += 0.0014
+      groupRef.current.rotation.x = Math.sin(t * 0.35 + position[0] * 0.01) * 0.08
+      groupRef.current.rotation.z = Math.cos(t * 0.18 + position[1] * 0.02) * 0.03
     }
 
     if (materialRef.current) {
-      materialRef.current.uniforms.time.value = time
+      materialRef.current.uniforms.time.value = t
     }
 
-    if (glowRef.current) {
-      const scale = 1 + Math.sin(time * 2) * 0.03 + (hovered ? 0.1 : 0)
-      glowRef.current.scale.set(scale, scale, scale)
+    if (auraRef.current) {
+      const scale = hovered ? 1.26 : 1.14 + Math.sin(t * 1.7 + position[2] * 0.02) * 0.04
+      auraRef.current.scale.set(scale, scale, scale)
     }
 
-    if (innerGlowRef.current) {
-      const innerScale = 1 + Math.sin(time * 3) * 0.05
-      innerGlowRef.current.scale.set(innerScale, innerScale, innerScale)
-    }
-
-    if (ringsRef.current) {
-      ringsRef.current.children.forEach((ring, i) => {
-        ring.rotation.z += 0.002 * (i + 1) * (i % 2 === 0 ? 1 : -1)
-      })
+    if (ringRef.current) {
+      ringRef.current.rotation.y += 0.004
+      ringRef.current.rotation.x = Math.sin(t * 0.6) * 0.3
     }
   })
 
-  const colorA = new THREE.Color(gradient.colorA)
-  const colorB = new THREE.Color(gradient.colorB)
-  const mixedColor = new THREE.Color().lerpColors(colorA, colorB, 0.5)
-
   return (
     <group ref={groupRef} position={position}>
-      {/* Outer atmospheric glow */}
-      <mesh ref={glowRef} scale={1.5}>
-        <sphereGeometry args={[size, 48, 48]} />
-        <meshBasicMaterial 
-          color={mixedColor} 
-          transparent 
-          opacity={hovered ? 0.12 : 0.06} 
-          side={THREE.BackSide}
-        />
+      <mesh ref={auraRef}>
+        <sphereGeometry args={[size * 1.04, 24, 24]} />
+        <meshBasicMaterial color={mixedColor} transparent opacity={hovered ? 0.2 : 0.1} side={THREE.BackSide} />
       </mesh>
 
-      {/* Secondary glow layer */}
-      <mesh scale={1.3}>
-        <sphereGeometry args={[size, 32, 32]} />
-        <meshBasicMaterial 
-          color={colorB} 
-          transparent 
-          opacity={0.04} 
-          side={THREE.BackSide}
-        />
+      <mesh scale={1.18}>
+        <sphereGeometry args={[size, 18, 18]} />
+        <meshBasicMaterial color={gradient.colorB} transparent opacity={0.07} side={THREE.BackSide} />
       </mesh>
 
-      {/* Main metallic opalescent sphere */}
       <mesh
-        onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer' }}
-        onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default' }}
+        onPointerOver={() => {
+          setHovered(true)
+          document.body.style.cursor = "pointer"
+        }}
+        onPointerOut={() => {
+          setHovered(false)
+          document.body.style.cursor = "default"
+        }}
         onClick={() => onSelect(strategy)}
       >
-        <sphereGeometry args={[size, 64, 64]} />
-        <metallicGradientMaterial
-          ref={materialRef}
-          colorA={colorA}
-          colorB={colorB}
-          transparent
-          side={THREE.DoubleSide}
-          depthWrite={false}
-        />
+        <sphereGeometry args={[size, 34, 34]} />
+        <luminousMetalMaterial ref={materialRef} colorA={colorA} colorB={colorB} transparent depthWrite={false} />
       </mesh>
 
-      {/* Inner core glow */}
-      <mesh ref={innerGlowRef}>
-        <sphereGeometry args={[size * 0.25, 32, 32]} />
-        <meshBasicMaterial 
-          color={mixedColor} 
-          transparent 
-          opacity={0.9}
-        />
-      </mesh>
-
-      {/* Inner energy sphere */}
       <mesh>
-        <sphereGeometry args={[size * 0.15, 24, 24]} />
-        <meshBasicMaterial color="#ffffff" />
+        <icosahedronGeometry args={[size * 1.035, 1]} />
+        <meshBasicMaterial color={gradient.colorB} wireframe transparent opacity={hovered ? 0.22 : 0.1} />
       </mesh>
 
-      {/* Internal neural connections */}
-      {internalConnections.map((line, i) => (
-        <line key={i}>
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              count={2}
-              array={new Float32Array([
-                line[0].x, line[0].y, line[0].z,
-                line[1].x, line[1].y, line[1].z
-              ])}
-              itemSize={3}
-            />
-          </bufferGeometry>
-          <lineBasicMaterial 
-            color={mixedColor} 
-            transparent 
-            opacity={0.15}
-          />
-        </line>
-      ))}
+      <lineSegments>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" array={innerNetwork} count={innerNetwork.length / 3} itemSize={3} />
+        </bufferGeometry>
+        <lineBasicMaterial color={mixedColor} transparent opacity={0.18} />
+      </lineSegments>
 
-      {/* Energy rings - Iron Man style */}
-      <group ref={ringsRef}>
-        {energyRings.map((ring, i) => (
-          <mesh key={i} rotation={ring.rotation}>
-            <torusGeometry args={[ring.radius, ring.thickness, 8, 64]} />
-            <meshBasicMaterial 
-              color={i % 2 === 0 ? colorA : colorB} 
-              transparent 
-              opacity={hovered ? 0.7 : 0.4}
-            />
-          </mesh>
-        ))}
+      <mesh>
+        <sphereGeometry args={[size * 0.2, 18, 18]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.95} />
+      </mesh>
+
+      <mesh>
+        <sphereGeometry args={[size * 0.34, 20, 20]} />
+        <meshBasicMaterial color={gradient.colorA} transparent opacity={0.18} />
+      </mesh>
+
+      <group ref={ringRef}>
+        <mesh rotation={[Math.PI / 2.3, 0.2, 0]}>
+          <torusGeometry args={[size * 1.28, size * 0.035, 12, 72]} />
+          <meshBasicMaterial color={gradient.colorA} transparent opacity={hovered ? 0.62 : 0.3} />
+        </mesh>
+        <mesh rotation={[Math.PI / 1.6, Math.PI / 4, 0]}>
+          <torusGeometry args={[size * 1.42, size * 0.018, 10, 60]} />
+          <meshBasicMaterial color={gradient.colorB} transparent opacity={hovered ? 0.55 : 0.24} />
+        </mesh>
       </group>
 
-      {/* Hexagonal tech pattern overlay (subtle) */}
-      <mesh>
-        <icosahedronGeometry args={[size * 1.02, 1]} />
-        <meshBasicMaterial 
-          color={colorB}
-          wireframe 
-          transparent 
-          opacity={hovered ? 0.25 : 0.1}
-        />
-      </mesh>
-
-      {/* Hover label with premium styling */}
-      {hovered && (
-        <Html distanceFactor={12} center>
-          <div className="pointer-events-none backdrop-blur-xl px-5 py-3 rounded-xl whitespace-nowrap border"
+      {hovered ? (
+        <Html distanceFactor={18} center>
+          <div
+            className="pointer-events-none rounded-2xl border px-5 py-3 text-center shadow-2xl backdrop-blur-2xl"
             style={{
-              background: `linear-gradient(135deg, ${gradient.colorA}20, ${gradient.colorB}20)`,
+              background: `linear-gradient(135deg, ${gradient.colorA}20, ${gradient.colorB}22)`,
               borderColor: `${gradient.colorB}50`,
-              boxShadow: `0 0 30px ${gradient.colorA}30, 0 0 60px ${gradient.colorB}20`
+              boxShadow: `0 0 40px ${gradient.colorA}25, 0 0 90px ${gradient.colorB}10`,
             }}
           >
-            <p className="font-bold text-sm mb-1" style={{ color: gradient.colorB }}>{strategy.name}</p>
-            <p className="text-white/70 text-xs">{strategy.riskLevel} Risk</p>
+            <p className="text-sm font-semibold" style={{ color: gradient.colorB }}>
+              {strategy.name}
+            </p>
+            <p className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/65">
+              {strategy.riskLevel} risk • {strategy.timeframe}
+            </p>
           </div>
         </Html>
-      )}
+      ) : null}
     </group>
   )
 }

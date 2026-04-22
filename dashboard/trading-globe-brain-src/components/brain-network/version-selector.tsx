@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import { networkVersions } from "@/lib/trading-strategies"
 import { gradientPairs } from "./brain-globe"
 
 interface VersionSelectorProps {
@@ -8,68 +9,60 @@ interface VersionSelectorProps {
   onVersionChange: (version: number) => void
 }
 
-const versions = [
-  { id: 1, name: "Quantum", description: "75 nodes - Dense cluster", gradientIndex: 2 },
-  { id: 2, name: "Nebula", description: "105 nodes - Cosmic spread", gradientIndex: 0 },
-  { id: 3, name: "Synapse", description: "60 nodes - Neural focus", gradientIndex: 1 },
-  { id: 4, name: "Galaxy", description: "135 nodes - Maximum dispersion", gradientIndex: 3 },
-  { id: 5, name: "Singularity", description: "90 nodes - Balanced equilibrium", gradientIndex: 4 },
-]
-
 export function VersionSelector({ currentVersion, onVersionChange }: VersionSelectorProps) {
   return (
-    <div className="absolute top-24 left-6 md:left-8 z-20">
-      <div className="backdrop-blur-xl border rounded-2xl p-4 w-64"
+    <div className="absolute right-4 top-24 z-20 md:right-8 md:top-28">
+      <div
+        className="w-[290px] max-w-[82vw] rounded-[28px] border p-3 shadow-2xl backdrop-blur-2xl md:p-4"
         style={{
-          background: "linear-gradient(135deg, rgba(0,5,20,0.9), rgba(0,0,0,0.9))",
-          borderColor: "rgba(255,255,255,0.1)"
+          background: "linear-gradient(135deg, rgba(0,0,0,0.72), rgba(4,10,18,0.88))",
+          borderColor: "rgba(255,255,255,0.12)",
         }}
       >
-        <h3 className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-3 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          Network Versions
-        </h3>
+        <div className="mb-3 flex items-center gap-2 px-1">
+          <span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(73,225,255,0.9)]" />
+          <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/56">Five standalone versions</span>
+        </div>
+
         <div className="space-y-2">
-          {versions.map((version) => {
+          {networkVersions.map((version) => {
             const gradient = gradientPairs[version.gradientIndex]
-            const isActive = currentVersion === version.id
-            
+            const active = currentVersion === version.id
+
             return (
               <button
                 key={version.id}
                 onClick={() => onVersionChange(version.id)}
                 className={cn(
-                  "w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-300",
-                  isActive ? "scale-[1.02]" : "hover:scale-[1.01]"
+                  "w-full rounded-2xl border px-3 py-3 text-left transition duration-300",
+                  active ? "scale-[1.01]" : "hover:scale-[1.01]"
                 )}
                 style={{
-                  background: isActive 
-                    ? `linear-gradient(135deg, ${gradient.colorA}20, ${gradient.colorB}20)`
+                  background: active
+                    ? `linear-gradient(135deg, ${gradient.colorA}24, ${gradient.colorB}18)`
                     : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${isActive ? gradient.colorA + "50" : "transparent"}`,
-                  boxShadow: isActive ? `0 4px 20px ${gradient.colorA}20` : "none"
+                  borderColor: active ? `${gradient.colorB}55` : "rgba(255,255,255,0.06)",
+                  boxShadow: active ? `0 18px 46px ${gradient.colorA}1f` : "none",
                 }}
               >
-                <div 
-                  className="w-9 h-9 rounded-lg flex items-center justify-center text-black font-bold text-sm"
-                  style={{
-                    background: `linear-gradient(135deg, ${gradient.colorA}, ${gradient.colorB})`,
-                    boxShadow: `0 2px 10px ${gradient.colorA}40`
-                  }}
-                >
-                  {version.id}
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold text-black"
+                    style={{
+                      background: `linear-gradient(135deg, ${gradient.colorA}, ${gradient.colorB})`,
+                    }}
+                  >
+                    {version.id}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-semibold text-white">{version.name}</p>
+                      {active ? <span className="h-2 w-2 rounded-full" style={{ background: gradient.colorB }} /> : null}
+                    </div>
+                    <p className="mt-1 text-xs text-white/48">{version.globeCount}+ globes • {version.shortLabel}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-white/62">{version.description}</p>
+                  </div>
                 </div>
-                <div className="text-left flex-1">
-                  <p className="font-medium text-sm" style={{ color: isActive ? gradient.colorB : "rgba(255,255,255,0.8)" }}>
-                    {version.name}
-                  </p>
-                  <p className="text-white/40 text-xs">{version.description}</p>
-                </div>
-                {isActive && (
-                  <div className="w-2 h-2 rounded-full animate-pulse"
-                    style={{ background: gradient.colorA }}
-                  />
-                )}
               </button>
             )
           })}

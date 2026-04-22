@@ -14,13 +14,12 @@ export function SpaceParticles() {
     const colors = new Float32Array(count * 3)
 
     const colorPalette = [
-      new THREE.Color("#FFD700"),
-      new THREE.Color("#FF8C00"),
-      new THREE.Color("#00CED1"),
-      new THREE.Color("#00FF7F"),
-      new THREE.Color("#1E90FF"),
-      new THREE.Color("#9B30FF"),
-      new THREE.Color("#FF1744"),
+      new THREE.Color("#FFD44D"),
+      new THREE.Color("#FF9F1A"),
+      new THREE.Color("#2EA7FF"),
+      new THREE.Color("#49E1FF"),
+      new THREE.Color("#39E58C"),
+      new THREE.Color("#B9FF4F"),
       new THREE.Color("#FFFFFF"),
     ]
 
@@ -49,9 +48,9 @@ export function SpaceParticles() {
     const colors = new Float32Array(count * 3)
 
     const colorPalette = [
-      new THREE.Color("#FFD700"),
-      new THREE.Color("#00CED1"),
-      new THREE.Color("#9B30FF"),
+      new THREE.Color("#FFD44D"),
+      new THREE.Color("#49E1FF"),
+      new THREE.Color("#39E58C"),
     ]
 
     for (let i = 0; i < count; i++) {

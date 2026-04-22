@@ -413,64 +413,152 @@ export const tradingStrategies: TradingStrategy[] = [
   }
 ]
 
-// Generate positions for globes in 3D space - enhanced for 3x count
+export interface NetworkVersion {
+  id: number
+  name: string
+  shortLabel: string
+  description: string
+  hero: string
+  gradientIndex: number
+  globeCount: number
+  spread: number
+  clusterCount: number
+  neighborRadius: number
+  cameraDistance: number
+  verticalLift: number
+  sizeRange: [number, number]
+  rotationDrift: number
+}
+
+export const networkVersions: NetworkVersion[] = [
+  {
+    id: 1,
+    name: "Obsidian Core",
+    shortLabel: "dense luxury cluster",
+    description: "A large-globe brain with a compact obsidian-style core, oversized premium nodes, and short luminous pathways",
+    hero: "A dense, luxurious trading brain with oversized globes and a compact obsidian-style collapse",
+    gradientIndex: 2,
+    globeCount: 120,
+    spread: 96,
+    clusterCount: 5,
+    neighborRadius: 54,
+    cameraDistance: 176,
+    verticalLift: 14,
+    sizeRange: [7.6, 10.4],
+    rotationDrift: 0.00018,
+  },
+  {
+    id: 2,
+    name: "Aureate Lattice",
+    shortLabel: "hero orbit formation",
+    description: "A richer halo with large statement globes, broad connective lanes, and a more cinematic spatial drift",
+    hero: "A cinematic gold-blue lattice designed to feel premium, fluid, and almost gravitational under the mouse",
+    gradientIndex: 0,
+    globeCount: 180,
+    spread: 118,
+    clusterCount: 6,
+    neighborRadius: 62,
+    cameraDistance: 188,
+    verticalLift: 18,
+    sizeRange: [7.2, 10.8],
+    rotationDrift: 0.00016,
+  },
+  {
+    id: 3,
+    name: "Treasury Synapse",
+    shortLabel: "cathedral brain field",
+    description: "A multi-layer cathedral of hundreds of interconnected globes meant to feel like elite institutional cognition",
+    hero: "Hundreds of interlinked globes behaving like a cathedral-scale treasury intelligence system",
+    gradientIndex: 4,
+    globeCount: 240,
+    spread: 132,
+    clusterCount: 7,
+    neighborRadius: 68,
+    cameraDistance: 202,
+    verticalLift: 22,
+    sizeRange: [6.9, 10.2],
+    rotationDrift: 0.00014,
+  },
+  {
+    id: 4,
+    name: "Sovereign Brain",
+    shortLabel: "panoramic premium mesh",
+    description: "A panoramic network of large globes with longer color lanes, wider spacing, and a more sovereign command-room silhouette",
+    hero: "A sovereign panoramic mesh where every oversized globe feels like its own autonomous trading chamber",
+    gradientIndex: 1,
+    globeCount: 300,
+    spread: 150,
+    clusterCount: 8,
+    neighborRadius: 74,
+    cameraDistance: 216,
+    verticalLift: 24,
+    sizeRange: [6.5, 9.8],
+    rotationDrift: 0.00012,
+  },
+  {
+    id: 5,
+    name: "Infinite Dominion",
+    shortLabel: "ultra-field neural luxury",
+    description: "The widest version, pushing into a true hundreds-of-globes dominion with aggressive depth, luxury lighting, and maximal interconnection",
+    hero: "The widest luxury version, built to feel like an infinite trading dominion made from hundreds of responsive globes",
+    gradientIndex: 3,
+    globeCount: 360,
+    spread: 172,
+    clusterCount: 9,
+    neighborRadius: 80,
+    cameraDistance: 232,
+    verticalLift: 28,
+    sizeRange: [6.1, 9.2],
+    rotationDrift: 0.0001,
+  },
+]
+
+export function getNetworkVersion(id: number) {
+  return networkVersions.find((version) => version.id === id) ?? networkVersions[0]
+}
+
 export function generateGlobePositions(count: number, spread: number = 100, version: number = 1): [number, number, number][] {
+  const config = getNetworkVersion(version)
+  const clusterCount = config.clusterCount
   const positions: [number, number, number][] = []
-  
-  // Different distribution patterns based on version
-  if (version === 1 || version === 3 || version === 5) {
-    // Fibonacci sphere distribution
-    const phi = Math.PI * (3 - Math.sqrt(5))
-    
-    for (let i = 0; i < count; i++) {
-      const y = 1 - (i / (count - 1)) * 2
-      const radius = Math.sqrt(1 - y * y)
-      const theta = phi * i
-      
-      const layerSpread = spread * (0.7 + Math.random() * 0.6)
-      
-      positions.push([
-        Math.cos(theta) * radius * layerSpread + (Math.random() - 0.5) * 15,
-        y * spread * 0.8 + (Math.random() - 0.5) * 15,
-        Math.sin(theta) * radius * layerSpread + (Math.random() - 0.5) * 15
-      ])
-    }
-  } else if (version === 2 || version === 4) {
-    // Clustered nebula distribution
-    const clusterCenters = [
-      [0, 0, 0],
-      [spread * 0.6, spread * 0.3, spread * 0.2],
-      [-spread * 0.5, spread * 0.4, -spread * 0.3],
-      [spread * 0.3, -spread * 0.5, spread * 0.4],
-      [-spread * 0.4, -spread * 0.3, spread * 0.5],
-      [spread * 0.2, spread * 0.6, -spread * 0.4],
-    ]
-    
-    for (let i = 0; i < count; i++) {
-      const cluster = clusterCenters[i % clusterCenters.length]
-      const clusterSpread = spread * 0.4
-      
-      positions.push([
-        cluster[0] + (Math.random() - 0.5) * clusterSpread,
-        cluster[1] + (Math.random() - 0.5) * clusterSpread,
-        cluster[2] + (Math.random() - 0.5) * clusterSpread
-      ])
-    }
+  const centers: [number, number, number][] = []
+
+  for (let i = 0; i < clusterCount; i++) {
+    const angle = (i / clusterCount) * Math.PI * 2
+    const ringRadius = spread * (0.22 + (i % 3) * 0.08)
+    centers.push([
+      Math.cos(angle) * ringRadius,
+      Math.sin(angle * 1.8) * spread * 0.18,
+      Math.sin(angle) * ringRadius,
+    ])
   }
-  
+  centers.unshift([0, 0, 0])
+
+  const golden = Math.PI * (3 - Math.sqrt(5))
+
+  for (let i = 0; i < count; i++) {
+    const center = centers[i % centers.length]
+    const theta = golden * i
+    const localRadius = spread * (0.04 + ((i % 11) / 11) * 0.18 + Math.random() * 0.06)
+    const verticalBias = ((i % 17) / 17 - 0.5) * spread * 0.26
+    const shell = 0.55 + ((i % 5) / 10)
+    const isCore = i % 9 === 0
+
+    const x = center[0] + Math.cos(theta) * localRadius * shell + (Math.random() - 0.5) * spread * 0.05
+    const y = (isCore ? center[1] * 0.4 : center[1]) + verticalBias + (Math.random() - 0.5) * spread * 0.04
+    const z = center[2] + Math.sin(theta) * localRadius * shell + (Math.random() - 0.5) * spread * 0.05
+
+    positions.push([x, y, z])
+  }
+
   return positions
 }
 
-// Generate gradient indices with good distribution
 export function generateGradientIndices(count: number): number[] {
-  const indices: number[] = []
-  for (let i = 0; i < count; i++) {
-    indices.push(i % 5)
-  }
-  // Shuffle for more organic distribution
+  const indices = Array.from({ length: count }, (_, index) => index % 5)
   for (let i = indices.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [indices[i], indices[j]] = [indices[j], indices[i]]
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[indices[i], indices[j]] = [indices[j], indices[i]]
   }
   return indices
 }
