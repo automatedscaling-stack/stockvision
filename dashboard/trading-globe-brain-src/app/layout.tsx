@@ -5,6 +5,7 @@ import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const basePath = process.env.TRADING_GLOBE_BASE_PATH || "/trading-globe"
 
 export const metadata: Metadata = {
   title: "Trading Globe Brain | StockVision Standalone UI",
@@ -13,19 +14,19 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/trading-globe/icon-light-32x32.png",
+        url: `${basePath}/icon-light-32x32.png`,
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/trading-globe/icon-dark-32x32.png",
+        url: `${basePath}/icon-dark-32x32.png`,
         media: "(prefers-color-scheme: dark)",
       },
       {
-        url: "/trading-globe/icon.svg",
+        url: `${basePath}/icon.svg`,
         type: "image/svg+xml",
       },
     ],
-    apple: "/trading-globe/apple-icon.png",
+    apple: `${basePath}/apple-icon.png`,
   },
 }
 

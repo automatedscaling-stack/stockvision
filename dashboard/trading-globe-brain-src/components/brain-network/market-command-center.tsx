@@ -50,7 +50,7 @@ type PredictionsResponse = {
   }
 }
 
-type AuthState = "checking" | "ready" | "login_required"
+type AuthState = "checking" | "ready" | "login_required" | "api_unavailable"
 
 function currency(value?: number) {
   if (value === undefined || value === null || Number.isNaN(value)) return "--"
@@ -134,6 +134,8 @@ export function MarketCommandCenter() {
         if (cancelled) return
         if (status === 200 && data?.logged_in) {
           setAuthState("ready")
+        } else if (status === 404) {
+          setAuthState("api_unavailable")
         } else {
           setAuthState("login_required")
         }
@@ -264,31 +266,45 @@ export function MarketCommandCenter() {
             <div
               className="rounded-full border px-3 py-1 text-[11px] font-semibold"
               style={{
-                borderColor: authState === "ready" ? "rgba(16,185,129,0.28)" : "rgba(245,158,11,0.28)",
-                background: authState === "ready" ? "rgba(16,185,129,0.12)" : "rgba(245,158,11,0.12)",
-                color: authState === "ready" ? "#86efac" : "#fcd34d",
+                borderColor:
+                  authState === "ready"
+                    ? "rgba(16,185,129,0.28)"
+                    : authState === "api_unavailable"
+                      ? "rgba(56,189,248,0.28)"
+                      : "rgba(245,158,11,0.28)",
+                background:
+                  authState === "ready"
+                    ? "rgba(16,185,129,0.12)"
+                    : authState === "api_unavailable"
+                      ? "rgba(56,189,248,0.12)"
+                      : "rgba(245,158,11,0.12)",
+                color: authState === "ready" ? "#86efac" : authState === "api_unavailable" ? "#7dd3fc" : "#fcd34d",
               }}
             >
-              {authState === "ready" ? "API linked" : authState === "checking" ? "Checking access" : "Login required"}
+              {authState === "ready" ? "API linked" : authState === "checking" ? "Checking access" : authState === "api_unavailable" ? "Static preview" : "Login required"}
             </div>
           </div>
 
           {authState !== "ready" ? (
-            <div className="rounded-3xl border border-amber-400/20 bg-amber-400/8 p-4 text-sm text-white/75">
-              <div className="mb-2 flex items-center gap-2 text-amber-300">
+            <div className={`rounded-3xl border p-4 text-sm text-white/75 ${authState === "api_unavailable" ? "border-sky-400/20 bg-sky-400/8" : "border-amber-400/20 bg-amber-400/8"}`}>
+              <div className={`mb-2 flex items-center gap-2 ${authState === "api_unavailable" ? "text-sky-300" : "text-amber-300"}`}>
                 <ShieldCheck className="h-4 w-4" />
-                <span className="font-semibold">Session required</span>
+                <span className="font-semibold">{authState === "api_unavailable" ? "Static preview mode" : "Session required"}</span>
               </div>
               <p className="leading-6 text-white/70">
-                The globe UI is live, but the stock predictor data plane is protected by the existing Flask session. Sign in once to unlock search, recommendations, news, and live signal overlays.
+                {authState === "api_unavailable"
+                  ? "This public preview is running without the private stock predictor API behind it. The 3D standalone UI is deployed, and the full data-connected experience remains available from the integrated Flask route at /trading-globe."
+                  : "The globe UI is live, but the stock predictor data plane is protected by the existing Flask session. Sign in once to unlock search, recommendations, news, and live signal overlays."}
               </p>
-              <button
-                onClick={() => (window.location.href = "/login")}
-                className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-cyan-400/30 bg-cyan-400/12 px-4 py-2 font-semibold text-cyan-200 transition hover:bg-cyan-400/18"
-              >
-                <LogIn className="h-4 w-4" />
-                Open login
-              </button>
+              {authState === "api_unavailable" ? null : (
+                <button
+                  onClick={() => (window.location.href = "/login")}
+                  className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-cyan-400/30 bg-cyan-400/12 px-4 py-2 font-semibold text-cyan-200 transition hover:bg-cyan-400/18"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Open login
+                </button>
+              )}
             </div>
           ) : (
             <>
